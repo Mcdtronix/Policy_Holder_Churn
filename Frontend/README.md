@@ -1,73 +1,78 @@
-# Welcome to your Lovable project
+# Nyaradzo Insurance Churn Prediction — Frontend
 
-## Project info
+React-based frontend for the Nyaradzo Insurance Policyholder Churn Prediction System. Provides dashboards, analytics, policy management, and churn prediction visualizations.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Technologies
 
-## How can I edit this code?
+- [Vite](https://vitejs.dev/) — Build tool
+- [React](https://react.dev/) — UI framework
+- [TypeScript](https://www.typescriptlang.org/) — Type safety
+- [shadcn/ui](https://ui.shadcn.com/) — Component library
+- [Tailwind CSS](https://tailwindcss.com/) — Styling
+- [Axios](https://axios-http.com/) — HTTP client
+- [React Router](https://reactrouter.com/) — Routing
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- Node.js 16+ and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Setup
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to the frontend directory
+cd Frontend
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at **http://localhost:5173/**.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Available Scripts
 
-**Use GitHub Codespaces**
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server with hot reload |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build locally |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run tests |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project Structure
 
-## What technologies are used for this project?
+```
+Frontend/src/
+├── components/    # Reusable UI components
+├── contexts/      # React context providers (Auth, etc.)
+├── hooks/         # Custom hooks (useApiData, etc.)
+├── lib/           # API service, utilities
+├── pages/         # Page components (Dashboard, Reports, etc.)
+└── main.tsx       # Application entry point
+```
 
-This project is built with:
+## Connecting to the Backend
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The frontend communicates with the Django REST API backend. Set the API URL in your environment:
 
-## How can I deploy this project?
+```sh
+# .env.local
+VITE_API_URL=http://127.0.0.1:8000
+```
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Refer to the [Backend README](../Backend/README.md) for backend setup instructions.
 
-## Can I connect a custom domain to my Lovable project?
+## Deployment
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+1. Build the production bundle:
+   ```sh
+   npm run build
+   ```
+2. Deploy the contents of the `dist/` directory to your hosting provider.
