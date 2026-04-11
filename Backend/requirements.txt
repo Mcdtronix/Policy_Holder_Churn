@@ -1,0 +1,22 @@
+# ── Core Framework ────────────────────────────────────────────────────────────
+Django>=4.2,<5.0
+djangorestframework>=3.14,<4.0
+djangorestframework-simplejwt>=5.3,<6.0
+
+# ── API Utilities ─────────────────────────────────────────────────────────────
+django-cors-headers>=4.3,<5.0
+django-filter>=23.5,<25.0
+
+# ── Machine Learning ──────────────────────────────────────────────────────────
+scikit-learn==1.6.1
+joblib==1.4.2
+xgboost>=2.0,<3.0
+numpy==1.26.4
+pandas>=2.0,<3.0
+
+# ── Database ──────────────────────────────────────────────────────────────────
+# Uncomment for PostgreSQL in production:
+# psycopg2-binary>=2.9,<3.0
+
+# ── Development & Testing ─────────────────────────────────────────────────────
+pytest-django>=4.7,<5.0
