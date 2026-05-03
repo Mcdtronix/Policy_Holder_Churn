@@ -204,3 +204,4 @@ This project includes completed modules for:
 ## License
 
 This project is for educational and internal development use unless otherwise specified.
+# Churn Prediction App
