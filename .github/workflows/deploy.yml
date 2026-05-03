@@ -1,0 +1,43 @@
+name: Deploy Churn to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            echo "🚀 Deploying Churn..."
+            cd ~/churn
+            git pull origin main
+
+            # Backend
+            cd Backend
+            source venv/bin/activate
+            pip install -r requirements.txt --quiet
+            python manage.py migrate --noinput
+            python manage.py collectstatic --noinput
+            deactivate
+            sudo systemctl restart churn
+
+            # Frontend
+            cd ../Frontend
+            npm install --silent
+            npm run build
+            sudo cp -r dist/* /var/www/churn/
+            sudo chown -R www-data:www-data /var/www/churn/
+
+            echo "✅ Churn deployed at https://churn.mcdtronix.co.zw"
