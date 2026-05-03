@@ -72,6 +72,7 @@ staticfiles/
 venv/
 env/
 ENV/
+.env
 
 # IDE
 .idea/
@@ -79,10 +80,15 @@ ENV/
 *.swp
 *.swo
 
-# Environment variables
+# Environment files — secrets, never commit
 .env
 .env.local
+.env*.local
+Backend/.env
 
+# These are safe to commit — no secrets, just URLs
+!Frontend/.env.development
+!Frontend/.env.production
 # OS
 .DS_Store
 Thumbs.db
@@ -90,6 +96,8 @@ Thumbs.db
 # Node
 node_modules/
 npm-debug.log
+#lib
+#lib64
 yarn-debug.log
 yarn-error.log
 

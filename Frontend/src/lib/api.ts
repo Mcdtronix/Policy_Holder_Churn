@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 
-// API Configuration
+// ✅ Fixed — falls back to localhost in local dev
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // API Response Types
