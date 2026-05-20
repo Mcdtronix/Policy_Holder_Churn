@@ -101,12 +101,17 @@ export default function PolicyRegistrationPage() {
         let fetchedIncome = extractArrayData(incomeRes);
         let fetchedLocations = extractArrayData(locationsRes);
         
+        const uniqueBy = <T, K>(items: T[], key: (item: T) => K): T[] => {
+          return Array.from(new Map(items.map((item) => [key(item), item])).values());
+        };
+
         // Normalize API responses to match expected interfaces
         // Genders: expect {id, label} but API might return {id, name}
         fetchedGenders = fetchedGenders.map((g: any) => ({
           id: g.id,
           label: g.label || g.name || g.value || ''
-        })).filter((g: any) => g.label); // Filter out empty labels
+        })).filter((g: any) => g.label);
+        fetchedGenders = uniqueBy(fetchedGenders, (g) => g.label);
         
         // Income Levels: expect {id, label} but API might return {id, name}
         // Extract just the first word from the label (e.g., "Low Income" -> "Low")
@@ -116,13 +121,15 @@ export default function PolicyRegistrationPage() {
             id: inc.id,
             label: label.split(' ')[0] // Extract first word to match validation schema
           };
-        }).filter((inc: any) => inc.label); // Filter out empty labels
+        }).filter((inc: any) => inc.label);
+        fetchedIncome = uniqueBy(fetchedIncome, (inc) => inc.label);
         
         // Locations: expect {id, city} but API might return {id, name}
         fetchedLocations = fetchedLocations.map((loc: any) => ({
           id: loc.id,
           city: loc.city || loc.name || loc.value || ''
-        })).filter((loc: any) => loc.city); // Filter out empty cities
+        })).filter((loc: any) => loc.city);
+        fetchedLocations = uniqueBy(fetchedLocations, (loc) => `${loc.city}-${loc.id}`);
 
         // Only warn if policy types are empty, but use fallback instead of throwing
         if (!Array.isArray(fetchedPolicyTypes) || fetchedPolicyTypes.length === 0) {
@@ -194,9 +201,12 @@ export default function PolicyRegistrationPage() {
     try {
       setError(null);
 
-      // ─────────────────────────────────────────
-      // 1. VALIDATE DEPENDENTS (if any provided)
-      // ─────────────────────────────────────────
+      console.groupCollapsed('[PolicyRegistration] Submission trace');
+      console.log('Form values:', data);
+      console.log('Dependents array:', dependents);
+      console.log('Policy types loaded:', policyTypes.map(pt => ({ id: pt.id, name: pt.name, code: pt.code })));
+      console.groupEnd();
+
       // Validate only the dependents that have been started (not partially filled)
       for (const dep of dependents) {
         const hasAnyData = dep.name?.trim() || dep.relationship?.trim() || dep.dateOfBirth?.trim() || dep.idNumber?.trim();
@@ -224,6 +234,16 @@ export default function PolicyRegistrationPage() {
         throw new Error(
           `Selected policy type "${data.policyType}" not found. Available types: ${policyTypes.map(pt => pt.name).join(', ')}`
         );
+      }
+
+      const selectedPolicyTypeCode = selectedPolicyType.code?.toLowerCase?.() || '';
+      const selectedPolicyTypeName = selectedPolicyType.name?.toLowerCase?.() || '';
+      const isFamilyPolicy = selectedPolicyTypeCode === 'fam' || selectedPolicyTypeName.includes('family');
+
+      if (isFamilyPolicy && dependents.length === 0) {
+        toast.error('Family policies require at least one dependent. Please add a dependent before submitting.');
+        setSubmitting(false);
+        return;
       }
 
       // ─────────────────────────────────────────
@@ -304,7 +324,11 @@ export default function PolicyRegistrationPage() {
         ],
       };
 
-      console.log('[PolicyRegistration] Submitting policy:', policyPayload);
+      console.group('[PolicyRegistration] Policy submission');
+      console.log('Selected policy type:', selectedPolicyType);
+      console.log('isFamilyPolicy:', isFamilyPolicy, 'dependents count:', dependents.length);
+      console.log('[PolicyRegistration] Submitting policy payload:', policyPayload);
+      console.groupEnd();
       const policyResponse = await apiService.createPolicy(policyPayload);
 
       toast.success('Policy registered successfully!', {
@@ -316,8 +340,29 @@ export default function PolicyRegistrationPage() {
       setDependents([]);
       setTimeout(() => navigate('/policyholders'), 2000);
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to register policy. Please try again.';
-      console.error('[PolicyRegistration] Error:', err);
+      console.error('[PolicyRegistration] Error object:', err);
+      const apiErrors = err?.errors;
+      let errorMessage = err?.message || 'Failed to register policy. Please try again.';
+
+      if (Array.isArray(apiErrors)) {
+        errorMessage = apiErrors.join(' | ');
+      } else if (apiErrors && typeof apiErrors === 'object') {
+        const fieldMessages = Object.entries(apiErrors).flatMap(([field, value]) => {
+          if (Array.isArray(value)) {
+            return value.map((message) => `${field}: ${message}`);
+          }
+          if (typeof value === 'string') {
+            return [`${field}: ${value}`];
+          }
+          return [];
+        });
+
+        if (fieldMessages.length > 0) {
+          errorMessage = fieldMessages.join(' | ');
+        }
+      }
+
+      console.error('[PolicyRegistration] Parsed error message:', errorMessage);
       setError(errorMessage);
       toast.error('Registration failed', { description: errorMessage });
     } finally {
@@ -534,7 +579,9 @@ export default function PolicyRegistrationPage() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <h3 className="text-lg font-semibold font-display">Dependents</h3>
-              <p className="text-sm text-muted-foreground mt-1">Add dependents covered under this policy (optional - leave empty if not applicable)</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Add dependents covered under this policy. Family policies require at least one dependent.
+              </p>
             </div>
             {dependents.length < 6 && (
               <Button type="button" variant="outline" size="sm" onClick={addDependent}>
